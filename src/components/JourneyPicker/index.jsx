@@ -4,9 +4,11 @@ import './style.css';
 export const CityOptions = ({ cities }) => {
   return (
     <>
-      <option key='blank' value="">Vyberte</option>
+      <option key="blank" value="">
+        Vyberte
+      </option>
       {cities.map((city) => (
-        <option value={city.name} key={city.code}>
+        <option value={city.code} key={city.code}>
           {city.name}
         </option>
       ))}
@@ -17,7 +19,9 @@ export const CityOptions = ({ cities }) => {
 export const DatesOptions = ({ dates }) => {
   return (
     <>
-      <option key='blank' value="">Vyberte</option>
+      <option key="blank" value="">
+        Vyberte
+      </option>
       {dates.map((date) => (
         <option key={date.dateBasic} value={date.dateBasic}>
           {date.dateCs}
@@ -32,8 +36,8 @@ export const JourneyPicker = ({ onJourneyChange }) => {
   const [toCity, setToCity] = useState('');
   const [date, setDate] = useState('');
   const [cities, setCities] = useState([]);
-  const [dates, setDates] = useState([])
-  
+  const [dates, setDates] = useState([]);
+
   useEffect(() => {
     const citiesAPI = async () => {
       const response = await fetch(
@@ -43,8 +47,6 @@ export const JourneyPicker = ({ onJourneyChange }) => {
       setCities(data.results);
     };
     citiesAPI();
-  }, []);
-  useEffect(()=> {
     const dateAPI = async () => {
       const response = await fetch(
         'https://apps.kodim.cz/daweb/leviexpress/api/dates',
@@ -53,11 +55,15 @@ export const JourneyPicker = ({ onJourneyChange }) => {
       setDates(data.results);
     };
     dateAPI();
-  },[])
+  }, []);
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
-    console.log(fromCity, toCity, date);
+    const response = await fetch(
+      `https://apps.kodim.cz/daweb/leviexpress/api/journey?fromCity=${fromCity}&toCity=${toCity}&date=${date}`,
+    );
+    const data = await response.json();
+    onJourneyChange(data.results);
   };
   const handleSelectFromCity = (event) => {
     const newSelect = event.target.value;
@@ -71,6 +77,7 @@ export const JourneyPicker = ({ onJourneyChange }) => {
     const newSelect = event.target.value;
     setDate(newSelect);
   };
+
   return (
     <div className="journey-picker container">
       <h2 className="journey-picker__head">Kam chcete jet?</h2>
@@ -95,7 +102,12 @@ export const JourneyPicker = ({ onJourneyChange }) => {
             </select>
           </label>
           <div className="journey-picker__controls">
-            <button onClick={handleSubmit} className="btn" type="submit">
+            <button
+              onClick={handleSubmit}
+              className="btn"
+              type="submit"
+              disabled={fromCity === '' || toCity === '' || date === ''}
+            >
               Vyhledat spoj
             </button>
           </div>
